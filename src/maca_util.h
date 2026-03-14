@@ -57,6 +57,11 @@ extern char *isa[N_ISA];
 
 typedef struct config_t {
   // Add configuration flags here
+  uint8_t  show_header;
+  uint8_t  show_sections;
+  uint8_t  show_segments;
+  uint8_t  show_dynamic;
+  uint8_t  show_lang;
   uint8_t  show_strings;
   int      strings_size;
 } MACA_CONF;
