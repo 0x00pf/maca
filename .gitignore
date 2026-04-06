@@ -1,0 +1,32 @@
+*~
+*.o
+*.a
+*.so
+maca
+
+
+# Core
+core
+core.*
+
+# Autotools
+autom4te.cache/
+aclocal.m4
+ar-lib
+m4/
+config.h
+config.log
+config.status
+configure
+Makefile.in 
+Makefile
+config.guess
+config.h.in
+config.sub
+depcomp
+compile
+install-sh
+ltmain.sh
+missing
+stamp-h1
+.deps/

@@ -258,13 +258,20 @@ maca_read_symbols64 (MACA_OBJ *o) {
     o->sym = NULL;
     return 0;
   }
+  ss = sds = -1;
   for (int i = 0; i < o->n_s; i++) {
     if (o->s[i].type == SHT_SYMTAB) ss = i;
     if (o->s[i].type == SHT_DYNSYM) sds = i;
   }
-  // Process general symbols
-  int n1 = o->s[ss].size / o->s[ss].ent_size;
-  int n2 = o->s[sds].size / o->s[sds].ent_size;
+
+  int n1, n2;
+  if (ss != -1) n1 = o->s[ss].size / o->s[ss].ent_size;
+  else n1 = 0;
+  if (sds != -1) n2 = o->s[sds].size / o->s[sds].ent_size;
+  else n2 = 0;
+
+
+  // Process general symbols  
   if ((o->sym = malloc (sizeof(MACA_SYM)*(n1 + n2))) == NULL) {
     fprintf (stderr, "Canot allocate memory\n");
     return -1;
@@ -316,13 +323,19 @@ maca_read_symbols32 (MACA_OBJ *o) {
     o->sym = NULL;
     return 0;
   }
+  ss = -1;
+  sds = -1;
   for (int i = 0; i < o->n_s; i++) {
     if (o->s[i].type == SHT_SYMTAB) ss = i;
     if (o->s[i].type == SHT_DYNSYM) sds = i;
   }
   // Process general symbols
-  int n1 = o->s[ss].size / o->s[ss].ent_size;
-  int n2 = o->s[sds].size / o->s[sds].ent_size;
+  int n1,n2;
+  
+  if (ss != -1) n1 = o->s[ss].size / o->s[ss].ent_size;
+  else n1 = 0;
+  if (sds != -1) n2 = o->s[sds].size / o->s[sds].ent_size;
+  else n2 = 0;
   if ((o->sym = malloc (sizeof(MACA_SYM)*(n1 + n2))) == NULL) {
     fprintf (stderr, "Canot allocate memory\n");
     return -1;

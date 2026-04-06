@@ -212,6 +212,8 @@ maca_out_elf_dyn_section (MACA_OBJ *o){
 int
 maca_out_elf_symbols (MACA_OBJ *o) {
   char *tmp, *tmp1;
+  int   ind_rust = 0;
+  
   if (!o) return -1;
   printf ( BG_WHITE "SYMBOLS & DYNAMC SYMBOLS                                                                                               "RESET"\n");  
   if (o->n_sym == 0) printf (FG_RED "No symbols found. Binary Stripped\n" RESET);
@@ -232,12 +234,18 @@ maca_out_elf_symbols (MACA_OBJ *o) {
     else if (!strncmp (tmp, ".fini", 5)) printf (FG_BLUE);
 
     tmp1 = RESET;
-    if      (!strcmp (o->sym[i].name, "main"))             printf (BG_RED2);
-    else if (!strncmp (o->sym[i].name, "mprotect", 8))     printf (BG_RED2);
-    else if (!strncmp (o->sym[i].name, "mmap", 4))         printf (BG_RED2);
-    else if (!strncmp (o->sym[i].name, "exec", 4))         printf (BG_RED2);
-    else if (!strncmp (o->sym[i].name, "memfd_create",12)) printf (BG_RED2);
+    if      (!strcmp (o->sym[i].name, "main"))             {printf (BG_RED2);}
+    else if (!strcmp (o->sym[i].name, "main.main"))        {printf (BG_RED2);
+                                                            o->lang[LANG_GO]+=1.0;}
+    else if (!strcmp (o->sym[i].name, "_start"))           {printf (BG_WHITE);
+                                                            o->lang[LANG_C]+=1.0;
+                                                            o->lang[LANG_RUST]+=1.0;}
+    else if (!strncmp (o->sym[i].name, "mprotect", 8))     {printf (BG_RED2);}
+    else if (!strncmp (o->sym[i].name, "mmap", 4))         {printf (BG_RED2);}
+    else if (!strncmp (o->sym[i].name, "exec", 4))         {printf (BG_RED2);}
+    else if (!strncmp (o->sym[i].name, "memfd_create",12)) {printf (BG_RED2);}
 
+    if (strlen (o->sym[i].name) > 180) ind_rust++;
     if (o->sym[i].type == STT_FUNC && o->sym[i].section != SHN_UNDEF) {
       int ph = maca_obj_find_ph_by_addr (o, o->sym[i].value);
       //if (!(o->ph[ph].flags & PF_X)) tmp1 =  BG_RED2 "<======" RESET;
@@ -251,6 +259,7 @@ maca_out_elf_symbols (MACA_OBJ *o) {
 	    tmp, o->sym[i].name, tmp1);
 
   }
+  if (ind_rust > 5) o->lang[LANG_RUST] +=1.0;
   return 0;
 }
 
