@@ -135,7 +135,7 @@ maca_obj_new (char *fname) {
     maca_read_sections32 (tmp);
     maca_read_ph32 (tmp);
     maca_read_dynamic_section32 (tmp);
-    
+    maca_read_symbols32 (tmp);    
   } else { // 64 bits
     tmp->n_s       = tmp->get_u16(elf_hdr->e_shnum);
     tmp->n_p       = tmp->get_u16(elf_hdr->e_phnum);
@@ -152,7 +152,7 @@ maca_obj_new (char *fname) {
     maca_read_sections64 (tmp);
     maca_read_ph64 (tmp);
     maca_read_dynamic_section64 (tmp);
-    
+    maca_read_symbols64 (tmp);
   }
 
   // At this point everything is parsed. We can analyse things

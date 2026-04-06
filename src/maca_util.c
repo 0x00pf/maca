@@ -585,3 +585,20 @@ MACA_CONF*
 maca_util_get_conf () {
   return &maca_conf;
 }
+
+
+char *
+maca_util_elf_get_symbol_type (int i) {
+  switch (i) {
+  case STT_NOTYPE : return "NOTYPE";    /* Symbol type is unspecified */
+  case STT_OBJECT : return "OBJECT";    /* Symbol is a data object */
+  case STT_FUNC   : return "FUNC";      /* Symbol is a code object */
+  case STT_SECTION: return "SECTION";   /* Symbol associated with a section */
+  case STT_FILE   : return "FILE";      /* Symbol's name is file name */
+  case STT_COMMON : return "COMMON";    /* Symbol is a common data object */
+  case STT_TLS    : return "TLS";       /* Symbol is thread-local data object*/
+  default:
+    return "UNKNOWN";
+  }
+
+}

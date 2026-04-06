@@ -57,6 +57,16 @@ typedef struct maca_dyn_t {
   } un;
 } MACA_DYN;
 
+typedef struct maca_sym_t {
+  char      *name;
+  uint8_t   is_dynamic;
+  uint64_t  section;
+  uint64_t  size;
+  uint64_t  type;
+  uint64_t  bind;
+  uint64_t  vis;
+  uint64_t  value;
+} MACA_SYM;
 
 // TODO: Add zig, Nim and Crystal
 #define LANG_UNKNOWN 0
@@ -89,6 +99,7 @@ typedef struct maca_obj_t {
   uint16_t        n_s;
   uint16_t        n_p;
   uint16_t        n_dn;
+  uint16_t        n_sym;
   uint16_t        sent_size;
   uint16_t        pent_size;
   uint64_t        s_off;
@@ -101,7 +112,7 @@ typedef struct maca_obj_t {
   MACA_PH         *ph;
   MACA_PH         *pdyn;
   MACA_DYN        *dyn;
-
+  MACA_SYM        *sym;
 } MACA_OBJ;
 
 

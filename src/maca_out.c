@@ -28,6 +28,25 @@
 
 char *lang[LANG_LAST]={"Unknown", "C/ASM", "CPP", "Rust", "Go"};
 
+
+int
+maca_obj_find_sec_by_addr (MACA_OBJ *o, uint64_t addr) {
+  for (int i = 0; i < o->n_s; i++) {
+    if ((addr >= o->s[i].off) && (addr < (o->s[i].off + o->s[i].size))) return i;
+  }
+  return -1;
+}
+
+int
+maca_obj_find_ph_by_addr (MACA_OBJ *o, uint64_t addr) {
+  for (int i = 0; i < o->n_p; i++) {
+    if ((addr >= o->ph[i].vaddr) && (addr < (o->ph[i].vaddr + o->ph[i].msize))) return i;
+  }
+  return -1;
+}
+
+
+
 int
 maca_out_elf_info (MACA_OBJ *o) {
   if (!o) return -1;
@@ -191,12 +210,51 @@ maca_out_elf_dyn_section (MACA_OBJ *o){
 
 
 int
-maca_obj_find_sec_by_addr (MACA_OBJ *o, uint64_t addr) {
-  for (int i = 0; i < o->n_s; i++) {
-    if ((addr >= o->s[i].off) && (addr < (o->s[i].off + o->s[i].size))) return i;
+maca_out_elf_symbols (MACA_OBJ *o) {
+  char *tmp, *tmp1;
+  if (!o) return -1;
+  printf ( BG_WHITE "SYMBOLS & DYNAMC SYMBOLS                                                                                               "RESET"\n");  
+  if (o->n_sym == 0) printf (FG_RED "No symbols found. Binary Stripped\n" RESET);
+  for (int i = 0; i < o->n_sym; i ++) {
+    if (o->sym[i].section == 0) tmp = "UNDEFINED";
+    else if (o->sym[i].section == SHN_ABS) tmp = "ABS";
+    else if (o->sym[i].section == SHN_COMMON) tmp = "COMMON";
+    else if (o->sym[i].section == SHN_XINDEX) tmp = "XINDEX";
+    else tmp = o->s[o->sym[i].section].name;
+    // Color Sections
+    if (!strcmp (tmp, ".text")) printf (FG_LGREEN);
+    else if (!strcmp (tmp, ".data")) printf (FG_GREEN);
+    else if (!strcmp (tmp, ".bss")) printf (FG_GREEN);
+    else if (!strcmp (tmp, ".rodata")) printf (FG_CYAN);
+    else if (!strcmp (tmp, "UNDEFINED")) printf (FG_LYELLOW);
+    else if (!strcmp (tmp, "ABS")) printf (FG_MAGENTA);
+    else if (!strncmp (tmp, ".init", 5)) printf (FG_BLUE);
+    else if (!strncmp (tmp, ".fini", 5)) printf (FG_BLUE);
+
+    tmp1 = RESET;
+    if      (!strcmp (o->sym[i].name, "main"))             printf (BG_RED2);
+    else if (!strncmp (o->sym[i].name, "mprotect", 8))     printf (BG_RED2);
+    else if (!strncmp (o->sym[i].name, "mmap", 4))         printf (BG_RED2);
+    else if (!strncmp (o->sym[i].name, "exec", 4))         printf (BG_RED2);
+    else if (!strncmp (o->sym[i].name, "memfd_create",12)) printf (BG_RED2);
+
+    if (o->sym[i].type == STT_FUNC && o->sym[i].section != SHN_UNDEF) {
+      int ph = maca_obj_find_ph_by_addr (o, o->sym[i].value);
+      //if (!(o->ph[ph].flags & PF_X)) tmp1 =  BG_RED2 "<======" RESET;
+      if (!(o->ph[ph].flags & PF_X)) printf (BG_RED2);
+    }
+    // Mark functions not in executable segments
+    printf ("[%4d] %c %08lx %4ld %8s %14s %-s %s\n",
+	    i, o->sym[i].is_dynamic ? 'D' : '-',
+	    o->sym[i].value, o->sym[i].size,
+	    maca_util_elf_get_symbol_type (o->sym[i].type),
+	    tmp, o->sym[i].name, tmp1);
+
   }
-  return -1;
+  return 0;
 }
+
+
 
 
 int

@@ -29,6 +29,7 @@ extern "C" {
   int maca_out_elf_sections (MACA_OBJ *o);
   int maca_out_elf_segments (MACA_OBJ *o);
   int maca_out_elf_dyn_section (MACA_OBJ *o);
+  int maca_out_elf_symbols (MACA_OBJ *o) ;
   int maca_out_strings (MACA_OBJ *o, size_t size, int print);
   int maca_out_file_lang (MACA_OBJ *o);
   

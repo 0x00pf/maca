@@ -249,3 +249,118 @@ maca_read_dynamic_section64 (MACA_OBJ *o) {
   return 0;
 }
 
+int
+maca_read_symbols64 (MACA_OBJ *o) {
+  int  ss, sds;
+
+  if (o->n_s == 0) {
+    o->n_sym = 0;
+    o->sym = NULL;
+    return 0;
+  }
+  for (int i = 0; i < o->n_s; i++) {
+    if (o->s[i].type == SHT_SYMTAB) ss = i;
+    if (o->s[i].type == SHT_DYNSYM) sds = i;
+  }
+  // Process general symbols
+  int n1 = o->s[ss].size / o->s[ss].ent_size;
+  int n2 = o->s[sds].size / o->s[sds].ent_size;
+  if ((o->sym = malloc (sizeof(MACA_SYM)*(n1 + n2))) == NULL) {
+    fprintf (stderr, "Canot allocate memory\n");
+    return -1;
+  }
+  o->n_sym = n1 + n2;
+  Elf64_Sym *symbol;
+  char *symstr = (char *)(o->p + o->s[o->s[ss].link].off);
+  char *sh_symtab_p = (char*)(o->p + o->s[ss].off);
+  for (int i = 0; i < n1; i++) {
+    symbol =  &((Elf64_Sym *)sh_symtab_p)[i];
+    if (symbol->st_name)
+      o->sym[i].name = strdup (symstr + symbol->st_name);
+    else
+      o->sym[i].name = "NONAME";
+    o->sym[i].value = symbol->st_value;
+    o->sym[i].type = ELF64_ST_TYPE(symbol->st_info);
+    o->sym[i].size = symbol->st_size;
+    o->sym[i].vis = ELF64_ST_VISIBILITY(symbol->st_other);
+    o->sym[i].is_dynamic = 0;
+    o->sym[i].section = symbol->st_shndx;
+  }
+
+  symstr = (char *)(o->p + o->s[o->s[sds].link].off);
+  sh_symtab_p = (char*)(o->p + o->s[sds].off);
+  for (int i = 0; i < n2; i++) {
+    symbol =  &((Elf64_Sym *)sh_symtab_p)[i];
+    if (symbol->st_name)
+      o->sym[n1+i].name = strdup (symstr + symbol->st_name);
+    else
+      o->sym[n1+i].name = "NONAME";
+    o->sym[n1+i].value = symbol->st_value;
+    o->sym[n1+i].type = ELF64_ST_TYPE(symbol->st_info);
+    o->sym[n1+i].size = symbol->st_size;
+    o->sym[n1+i].vis = ELF64_ST_VISIBILITY (symbol->st_other);
+    o->sym[n1+i].is_dynamic = 1;
+    o->sym[n1+i].section = symbol->st_shndx;
+  }
+
+  
+  return 0;
+}
+
+int
+maca_read_symbols32 (MACA_OBJ *o) {
+  int  ss, sds;
+
+  if (o->n_s == 0) {
+    o->n_sym = 0;
+    o->sym = NULL;
+    return 0;
+  }
+  for (int i = 0; i < o->n_s; i++) {
+    if (o->s[i].type == SHT_SYMTAB) ss = i;
+    if (o->s[i].type == SHT_DYNSYM) sds = i;
+  }
+  // Process general symbols
+  int n1 = o->s[ss].size / o->s[ss].ent_size;
+  int n2 = o->s[sds].size / o->s[sds].ent_size;
+  if ((o->sym = malloc (sizeof(MACA_SYM)*(n1 + n2))) == NULL) {
+    fprintf (stderr, "Canot allocate memory\n");
+    return -1;
+  }
+  o->n_sym = n1 + n2;
+  Elf32_Sym *symbol;
+  char *symstr = (char *)(o->p + o->s[o->s[ss].link].off);
+  char *sh_symtab_p = (char*)(o->p + o->s[ss].off);
+  for (int i = 0; i < n1; i++) {
+    symbol =  &((Elf32_Sym *)sh_symtab_p)[i];
+    if (symbol->st_name)
+      o->sym[i].name = strdup (symstr + symbol->st_name);
+    else
+      o->sym[i].name = "NONAME";
+    o->sym[i].value = symbol->st_value;
+    o->sym[i].type = ELF32_ST_TYPE(symbol->st_info);
+    o->sym[i].size = symbol->st_size;
+    o->sym[i].vis = ELF32_ST_VISIBILITY(symbol->st_other);
+    o->sym[i].is_dynamic = 0;
+    o->sym[i].section = symbol->st_shndx;
+  }
+
+  symstr = (char *)(o->p + o->s[o->s[sds].link].off);
+  sh_symtab_p = (char*)(o->p + o->s[sds].off);
+  for (int i = 0; i < n2; i++) {
+    symbol =  &((Elf32_Sym *)sh_symtab_p)[i];
+    if (symbol->st_name)
+      o->sym[n1+i].name = strdup (symstr + symbol->st_name);
+    else
+      o->sym[n1+i].name = "NONAME";
+    o->sym[n1+i].value = symbol->st_value;
+    o->sym[n1+i].type = ELF32_ST_TYPE(symbol->st_info);
+    o->sym[n1+i].size = symbol->st_size;
+    o->sym[n1+i].vis = ELF32_ST_VISIBILITY (symbol->st_other);
+    o->sym[n1+i].is_dynamic = 1;
+    o->sym[n1+i].section = symbol->st_shndx;
+  }
+
+  
+  return 0;
+}

@@ -23,6 +23,7 @@ maca_obj_dump (MACA_OBJ *o) {
   if (cfg->show_segments) maca_out_elf_segments (o);
   if (cfg->show_sections) maca_out_elf_sections (o);
   if (cfg->show_dynamic) maca_out_elf_dyn_section (o);
+  if (cfg->show_symbols) maca_out_elf_symbols (o);
   if (cfg->show_lang) maca_out_file_lang(o);
 
   return 0;
@@ -37,6 +38,7 @@ void usage (void) {
   printf (" -S --sections          Displays Section headers\n");
   printf (" -l --segments          Displays Program headers\n");
   printf (" -d --dynamic           Displays Dynamic Section\n");
+  printf (" -y --symbols           Displays Symbols\n");
   printf (" -L --languages         Displays Source Programmng Language guess\n");
 }
 
@@ -47,6 +49,7 @@ static struct option long_options[] = {
   {"strings",   optional_argument, NULL, 's'},
   {"header",    no_argument, NULL, 'h'},
   {"sections",  no_argument, NULL, 'S'},
+  {"symbols",   no_argument, NULL, 'y'},
   {"segments",  no_argument, NULL, 'l'},
   {"dynamic",   no_argument, NULL, 'd'},
   {"languages", no_argument, NULL, 'L'},
@@ -61,7 +64,7 @@ main (int argc, char *argv[]) {
   memset (cfg, 0, sizeof(MACA_CONF));
   while (1) {
     int index = 0;
-    int c = getopt_long (argc, argv, "aHhSlLds:", long_options, &index);
+    int c = getopt_long (argc, argv, "aHhSylLds:", long_options, &index);
     if (c == -1) break;
     if (c == 'a') {
       cfg->strings_size = 4;
@@ -70,12 +73,15 @@ main (int argc, char *argv[]) {
       cfg->show_sections = 1;
       cfg->show_segments = 1;
       cfg->show_dynamic = 1;
+      cfg->show_symbols = 1;
       cfg->show_lang = 1;
       
     }
     if (c == 'S') cfg->show_sections = 1;
+    if (c == 'h') cfg->show_header = 1;
     if (c == 'l') cfg->show_segments = 1;
     if (c == 'd') cfg->show_dynamic = 1;
+    if (c == 'y') cfg->show_symbols = 1;
     if (c == 'L') cfg->show_lang = 1;
     if (c == 's') {
       cfg->show_strings = 1;
@@ -89,7 +95,7 @@ main (int argc, char *argv[]) {
   }
 
   if (!cfg->show_header && !cfg->show_sections && !cfg->show_segments &&
-      !cfg->show_dynamic && !cfg->show_lang && !cfg->show_strings) {
+      !cfg->show_dynamic && !cfg->show_lang && !cfg->show_strings && !cfg->show_symbols) {
     usage ();
     exit (EXIT_SUCCESS);
   }

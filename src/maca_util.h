@@ -63,6 +63,7 @@ typedef struct config_t {
   uint8_t  show_dynamic;
   uint8_t  show_lang;
   uint8_t  show_strings;
+  uint8_t  show_symbols;
   int      strings_size;
 } MACA_CONF;
 
@@ -79,7 +80,7 @@ extern "C" {
   char      *maca_util_elf_get_isa     (MACA_OBJ *obj);
   int        maca_util_get_file_size   (int fd);  
   MACA_CONF *maca_util_get_conf ();
-
+  char      *maca_util_elf_get_symbol_type (int i);
 #ifdef __cplusplus
 }
 #endif
