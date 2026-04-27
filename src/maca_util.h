@@ -81,6 +81,13 @@ extern "C" {
   int        maca_util_get_file_size   (int fd);  
   MACA_CONF *maca_util_get_conf ();
   char      *maca_util_elf_get_symbol_type (int i);
+
+  // XXX: Maybe move this to maca_obj or a maca_obj_util
+  int        maca_obj_find_sec_by_addr (MACA_OBJ *o, uint64_t addr);
+  int        maca_obj_find_ph_by_addr (MACA_OBJ *o, uint64_t addr);
+  int        maca_obj_find_sym_by_addr (MACA_OBJ *o, uint64_t addr);
+  int        maca_obj_add_addr (MACA_OBJ *o, uint8_t type, uint64_t addr) ;
+  
 #ifdef __cplusplus
 }
 #endif

@@ -29,22 +29,6 @@
 char *lang[LANG_LAST]={"Unknown", "C/ASM", "CPP", "Rust", "Go"};
 
 
-int
-maca_obj_find_sec_by_addr (MACA_OBJ *o, uint64_t addr) {
-  for (int i = 0; i < o->n_s; i++) {
-    if ((addr >= o->s[i].off) && (addr < (o->s[i].off + o->s[i].size))) return i;
-  }
-  return -1;
-}
-
-int
-maca_obj_find_ph_by_addr (MACA_OBJ *o, uint64_t addr) {
-  for (int i = 0; i < o->n_p; i++) {
-    if ((addr >= o->ph[i].vaddr) && (addr < (o->ph[i].vaddr + o->ph[i].msize))) return i;
-  }
-  return -1;
-}
-
 
 
 int
@@ -180,6 +164,7 @@ maca_out_elf_dyn_section (MACA_OBJ *o){
 	printf (FG_LRED);
       }
       if (o->dyn[i].tag == DT_FINI_ARRAYSZ && o->dyn[i].un.val > 8) printf (FG_LRED);
+
       
       if (o->dyn[i].tag == DT_NEEDED) {
 	if (strstr (o->dstr + o->dyn[i].un.val, "c++") != NULL) o->lang[LANG_CPP]+=1;
@@ -189,13 +174,36 @@ maca_out_elf_dyn_section (MACA_OBJ *o){
 	maca_util_elf_get_flag(o->dyn[i].un.val, flags);
 	printf (FG_LGREEN "%-20s " RESET"%s\n" RESET, maca_util_elf_get_dtag(o, o->dyn[i].tag), flags);
       }
-      
       else if (o->dyn[i].tag == DT_FLAGS_1) {
 	maca_util_elf_get_flag1(o->dyn[i].un.val, flags);
 	printf (FG_LGREEN "%-20s " RESET"%s\n" RESET, maca_util_elf_get_dtag(o, o->dyn[i].tag), flags);
       }
-      else
-	printf ("%-20s 0x%lx\n", maca_util_elf_get_dtag(o, o->dyn[i].tag), o->dyn[i].un.val);
+      else {
+	int flag = 0;
+	printf ("%-20s 0x%lx " FG_BLUE, maca_util_elf_get_dtag(o, o->dyn[i].tag), o->dyn[i].un.val);
+	if (o->dyn[i].tag == DT_INIT_ARRAY) {
+	  flag = 0;
+	  for (int i = 0; i < o->n_addr; i++) {
+	    if (o->addr[i].type == ADDR_INI) {
+	      if (o->addr[i].name) printf ("%s ", o->addr[i].name);
+	      else printf ("%p ", (void*)o->addr[i].p);
+	      if (flag == 0) {flag =1; printf ("%s",FG_RED);}
+	    }
+	  }	    
+	}
+	if (o->dyn[i].tag == DT_FINI_ARRAY) {
+	  flag = 0;
+	  for (int i = 0; i < o->n_addr; i++) {
+	    if (o->addr[i].type == ADDR_FINI) {
+	      if (o->addr[i].name) printf ("%s ", o->addr[i].name);
+	      else printf ("%p ", (void*)o->addr[i].p);
+	      if (flag == 0) {flag =1; printf ("%s",FG_RED);}
+	    }
+	  }
+	}
+	printf ("\n");
+      }
+      
       if (show_constructors) {
 	// To be completed
 	show_constructors = 0;

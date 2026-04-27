@@ -68,6 +68,17 @@ typedef struct maca_sym_t {
   uint64_t  value;
 } MACA_SYM;
 
+#define ADDR_INI  0
+#define ADDR_FINI 1
+#define ADDR_FUNC 2
+
+typedef struct maca_addr_t {
+  char     *name;
+  uint8_t  type;  // INIT, FINI, FUNC, LABEL...
+  uint32_t ph;
+  uint64_t p;
+} MACA_ADDR;
+
 // TODO: Add zig, Nim and Crystal
 #define LANG_UNKNOWN 0
 #define LANG_C       1
@@ -100,6 +111,7 @@ typedef struct maca_obj_t {
   uint16_t        n_p;
   uint16_t        n_dn;
   uint16_t        n_sym;
+  uint64_t        n_addr;
   uint16_t        sent_size;
   uint16_t        pent_size;
   uint64_t        s_off;
@@ -113,6 +125,7 @@ typedef struct maca_obj_t {
   MACA_PH         *pdyn;
   MACA_DYN        *dyn;
   MACA_SYM        *sym;
+  MACA_ADDR       *addr;
 } MACA_OBJ;
 
 

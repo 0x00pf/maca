@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
@@ -601,4 +602,52 @@ maca_util_elf_get_symbol_type (int i) {
     return "UNKNOWN";
   }
 
+}
+
+
+int
+maca_obj_find_sec_by_addr (MACA_OBJ *o, uint64_t addr) {
+  for (int i = 0; i < o->n_s; i++) {
+    if ((addr >= o->s[i].off) && (addr < (o->s[i].off + o->s[i].size))) return i;
+  }
+  return -1;
+}
+
+int
+maca_obj_find_ph_by_addr (MACA_OBJ *o, uint64_t addr) {
+  for (int i = 0; i < o->n_p; i++) {
+    if ((addr >= o->ph[i].vaddr) && (addr < (o->ph[i].vaddr + o->ph[i].msize))) return i;
+  }
+  return -1;
+}
+
+int
+maca_obj_find_sym_by_addr (MACA_OBJ *o, uint64_t addr) {
+  for (int i = 0; i < o->n_sym; i++) {
+    if (addr == o->sym[i].value) return i;
+  }
+  return -1;
+}
+
+int
+maca_obj_add_addr (MACA_OBJ *o, uint8_t type, uint64_t addr) {
+  // Add ADDR entry
+  // XXX: Maybe memory allocation should happen in maca_obj...
+  MACA_ADDR *tmp = realloc (o->addr, sizeof(MACA_ADDR) * (o->n_addr + 1));
+  if (tmp == NULL) {
+    fprintf (stderr, "Cannot allocate memory for %ld addresses\n.Aborting\n", o->n_addr +1);
+    exit (1);
+  }
+  o->addr = tmp;
+  
+  o->addr[o->n_addr].ph = maca_obj_find_ph_by_addr (o, addr);
+  o->addr[o->n_addr].p = addr;
+  o->addr[o->n_addr].type = type;
+
+  // Does the address has a symbol associated?
+  int      s = maca_obj_find_sym_by_addr (o, addr);
+  if (s >= 0) o->addr[o->n_addr].name = strdup (o->sym[s].name);
+  else o->addr[o->n_addr].name = NULL;
+  o->n_addr++;
+  return 0;
 }

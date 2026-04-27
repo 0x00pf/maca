@@ -377,3 +377,37 @@ maca_read_symbols32 (MACA_OBJ *o) {
   
   return 0;
 }
+
+int
+maca_read_tabs (MACA_OBJ *o) {
+  // Find inittab and finitab
+  uint64_t init, fini;
+  int      n_init, n_fini;
+  for (int i = 0; i < o->n_dn; i++) {
+    if      (o->dyn[i].tag == DT_INIT_ARRAY) init = o->dyn[i].un.val;
+    else if (o->dyn[i].tag == DT_FINI_ARRAY) fini = o->dyn[i].un.val;
+    else if (o->dyn[i].tag == DT_INIT_ARRAYSZ) n_init = o->dyn[i].un.val;
+    else if (o->dyn[i].tag == DT_FINI_ARRAYSZ) n_fini = o->dyn[i].un.val;
+  }
+  int ph1 = maca_obj_find_ph_by_addr (o, init);
+  int ph2 = maca_obj_find_ph_by_addr (o, fini);
+  uint64_t o1 = (init - o->ph[ph1].vaddr + o->ph[ph1].off);
+  uint64_t o2 = (fini - o->ph[ph2].vaddr + o->ph[ph1].off);
+  printf ("INIT_ARRAY : %lx (%d) - %d (%lx)\n", init, n_init, ph1, o1);
+  printf ("FINI_ARRAY : %lx (%d) - %d (%lx)\n", fini, n_fini, ph2, o2);
+	  
+  void *p;
+
+  for (int i = 0; i < n_init/8; i++) {
+    p = *(void**)(o->p + o1 + sizeof(void*)*i);
+    maca_obj_add_addr (o, ADDR_INI, (uint64_t)p);
+    printf ("Adding addres %p\n", p);
+  }
+  for (int i = 0; i < n_fini/8; i++) {
+    p = *(void**)(o->p + o1 + sizeof(void*)*i);
+    maca_obj_add_addr (o, ADDR_FINI, (uint64_t)p);
+    printf ("Adding addres %p\n", p);
+  }
+  
+  return 0;
+}

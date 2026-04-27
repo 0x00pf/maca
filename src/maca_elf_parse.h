@@ -34,6 +34,8 @@ extern "C" {
 
   int maca_read_symbols64 (MACA_OBJ *o);
   int maca_read_symbols32 (MACA_OBJ *o);
+
+  int maca_read_tabs (MACA_OBJ *o);
   
 #ifdef __cplusplus
 }

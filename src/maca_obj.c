@@ -115,11 +115,13 @@ maca_obj_new (char *fname) {
   tmp->type    = tmp->get_u16(elf_hdr->e_type);
   tmp->machine = tmp->get_u16(elf_hdr->e_machine);
   tmp->isa     = tmp->machine;
-  
+
+  tmp->n_addr = 0;
+  tmp->addr = NULL;
   // Read Header info and allocates internal structures
   if (tmp->class == 1) { //32 bits
     Elf32_Ehdr* elf_hdr1 = (Elf32_Ehdr *) tmp->p;
-    
+
     tmp->n_s       = tmp->get_u16(elf_hdr1->e_shnum);
     tmp->n_p       = tmp->get_u16(elf_hdr1->e_phnum);
     tmp->sent_size = tmp->get_u16(elf_hdr1->e_shentsize);
@@ -155,6 +157,7 @@ maca_obj_new (char *fname) {
     maca_read_symbols64 (tmp);
   }
 
+  maca_read_tabs (tmp);
   // At this point everything is parsed. We can analyse things
   printf ("Analysing binary...\n");
   maca_ana_sections (tmp);
