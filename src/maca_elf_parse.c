@@ -393,20 +393,16 @@ maca_read_tabs (MACA_OBJ *o) {
   int ph2 = maca_obj_find_ph_by_addr (o, fini);
   uint64_t o1 = (init - o->ph[ph1].vaddr + o->ph[ph1].off);
   uint64_t o2 = (fini - o->ph[ph2].vaddr + o->ph[ph1].off);
-  printf ("INIT_ARRAY : %lx (%d) - %d (%lx)\n", init, n_init, ph1, o1);
-  printf ("FINI_ARRAY : %lx (%d) - %d (%lx)\n", fini, n_fini, ph2, o2);
 	  
   void *p;
 
   for (int i = 0; i < n_init/8; i++) {
     p = *(void**)(o->p + o1 + sizeof(void*)*i);
     maca_obj_add_addr (o, ADDR_INI, (uint64_t)p);
-    printf ("Adding addres %p\n", p);
   }
   for (int i = 0; i < n_fini/8; i++) {
-    p = *(void**)(o->p + o1 + sizeof(void*)*i);
+    p = *(void**)(o->p + o2 + sizeof(void*)*i);
     maca_obj_add_addr (o, ADDR_FINI, (uint64_t)p);
-    printf ("Adding addres %p\n", p);
   }
   
   return 0;
