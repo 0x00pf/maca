@@ -44,7 +44,7 @@ maca_ana_sections (MACA_OBJ *o) {
   }
   
 #ifdef DEBUG
-  printf ("C : %f C++: %f RUST: %f GO : %f\n", o->lang[LANG_C],
+  printf ("SECTIONS\nC : %f C++: %f RUST: %f GO : %f\n", o->lang[LANG_C],
 	  o->lang[LANG_CPP],
 	  o->lang[LANG_RUST],
 	  o->lang[LANG_GO]
@@ -68,5 +68,13 @@ maca_ana_dyn_section (MACA_OBJ *o) {
       }
     }
   }
+#ifdef DEBUG
+  printf ("DYNAMIC SECTION\nC : %f C++: %f RUST: %f GO : %f\n", o->lang[LANG_C],
+	  o->lang[LANG_CPP],
+	  o->lang[LANG_RUST],
+	  o->lang[LANG_GO]
+	  );
+#endif    
+
   return 0;
 }

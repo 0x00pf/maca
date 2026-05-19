@@ -173,6 +173,20 @@ maca_obj_free (MACA_OBJ *o) {
   if (o->s) free (o->s);
   if (o->ph) free (o->ph);
   if (o->dyn) free (o->dyn);
+  if (o->sym) {
+    for (uint16_t i = 0; i < o->n_sym; i++) {
+      if (o->sym[i].name && strcmp(o->sym[i].name, "NONAME") != 0) {
+        free(o->sym[i].name);
+      }
+    }
+    free(o->sym);
+  }
+  if (o->addr) {
+    for (uint64_t i = 0; i < o->n_addr; i++) {
+      if (o->addr[i].name) free(o->addr[i].name);
+    }
+    free(o->addr);
+  }
   
   munmap (o->p, o->file_size);
   free(o);

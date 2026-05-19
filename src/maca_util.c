@@ -501,25 +501,23 @@ maca_util_elf_get_flag (uint64_t i, char str[1024]) {
   char *p = str;
   
   if (i & DF_ORIGIN)     p += sprintf (p, "ORIGIN" );  
-  if (i & DF_SYMBOLIC)   p += sprintf (p, "SYMBOLIC");
-  if (i & DF_TEXTREL)    p += sprintf (p, "TEXTREL" );  
-  if (i & DF_BIND_NOW)   p += sprintf (p, FG_LYELLOW "BIND_NOW" RESET);
-  if (i & DF_STATIC_TLS) p += sprintf (p, "STATIC_TLS");
+  if (i & DF_SYMBOLIC)   p += sprintf (p, " SYMBOLIC");
+  if (i & DF_TEXTREL)    p += sprintf (p, " TEXTREL" );  
+  if (i & DF_BIND_NOW)   p += sprintf (p, " " FG_LYELLOW "BIND_NOW" RESET);
+  if (i & DF_STATIC_TLS) p += sprintf (p, " STATIC_TLS");
   
-  return NULL;
+  return str;
 }
 
 
 char *
 maca_util_elf_ph_perm (uint64_t i, char str[128]) {
-  char *p = str;
-
-  strcpy (p, "   ");
-  if (i & PF_X) p[2] = 'E';  
-  if (i & PF_W) p[1] = 'W';
-  if (i & PF_R) p[0] = 'R';
+  str[0] = (i & PF_R) ? 'R' : ' ';
+  str[1] = (i & PF_W) ? 'W' : ' ';
+  str[2] = (i & PF_X) ? 'E' : ' ';
+  str[3] = '\0';
   
-  return NULL;
+  return str;
 }
 
 
@@ -565,9 +563,9 @@ maca_util_elf_get_flag1 (uint64_t i, char str[1024]) {
 char *
 maca_util_elf_get_isa (MACA_OBJ *obj) {
   if (!obj) return NULL;
-  if (obj->isa > N_ISA) return "Unknown";
+  if (obj->isa >= N_ISA) return "Unknown";
   
-  else return isa[obj->isa];
+  return isa[obj->isa];
 }
  
 int

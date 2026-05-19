@@ -169,7 +169,7 @@ maca_read_sections64 (MACA_OBJ *o) {
 #endif
   }
 #ifdef DEBUG  
-  printf ("C : %f C++: %f RUST: %f GO : %f\n",
+  printf ("SECTIONS:\nC : %f C++: %f RUST: %f GO : %f\n",
 	  o->lang[LANG_C],
 	  o->lang[LANG_CPP],
 	  o->lang[LANG_RUST],
@@ -380,9 +380,12 @@ maca_read_symbols32 (MACA_OBJ *o) {
 
 int
 maca_read_tabs (MACA_OBJ *o) {
-  // Find inittab and finitab
   uint64_t init, fini;
   int      n_init, n_fini;
+  size_t   ptr_size = o->class == 1 ? 4 : 8;
+  
+  init = fini = 0;
+  n_init = n_fini = 0;
   for (int i = 0; i < o->n_dn; i++) {
     if      (o->dyn[i].tag == DT_INIT_ARRAY) init = o->dyn[i].un.val;
     else if (o->dyn[i].tag == DT_FINI_ARRAY) fini = o->dyn[i].un.val;
@@ -391,17 +394,18 @@ maca_read_tabs (MACA_OBJ *o) {
   }
   int ph1 = maca_obj_find_ph_by_addr (o, init);
   int ph2 = maca_obj_find_ph_by_addr (o, fini);
+  if (ph1 < 0 || ph2 < 0) return -1;
   uint64_t o1 = (init - o->ph[ph1].vaddr + o->ph[ph1].off);
-  uint64_t o2 = (fini - o->ph[ph2].vaddr + o->ph[ph1].off);
+  uint64_t o2 = (fini - o->ph[ph2].vaddr + o->ph[ph2].off);
 	  
   void *p;
 
-  for (int i = 0; i < n_init/8; i++) {
-    p = *(void**)(o->p + o1 + sizeof(void*)*i);
+  for (int i = 0; i < n_init / (int)ptr_size; i++) {
+    p = *(void**)(o->p + o1 + ptr_size * i);
     maca_obj_add_addr (o, ADDR_INI, (uint64_t)p);
   }
-  for (int i = 0; i < n_fini/8; i++) {
-    p = *(void**)(o->p + o2 + sizeof(void*)*i);
+  for (int i = 0; i < n_fini / (int)ptr_size; i++) {
+    p = *(void**)(o->p + o2 + ptr_size * i);
     maca_obj_add_addr (o, ADDR_FINI, (uint64_t)p);
   }
   

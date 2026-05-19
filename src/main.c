@@ -34,7 +34,7 @@ void usage (void) {
   printf ("Options:\n");
   printf (" -a --all               Equivalent to -h -l -S -s -d -L\n");
   printf (" -h --help              Shows this help\n");
-  printf (" -s --strings=[SIZE]    Finds strings with size >= than SIZE\n");
+  printf (" -s --strings           Displays strings\n");
   printf (" -S --sections          Displays Section headers\n");
   printf (" -l --segments          Displays Program headers\n");
   printf (" -d --dynamic           Displays Dynamic Section\n");
@@ -46,7 +46,7 @@ void usage (void) {
 static struct option long_options[] = {
   {"all",       no_argument, NULL, 'a'},
   {"help",      no_argument, NULL, 'H'},
-  {"strings",   optional_argument, NULL, 's'},
+  {"strings",   no_argument, NULL, 's'},
   {"header",    no_argument, NULL, 'h'},
   {"sections",  no_argument, NULL, 'S'},
   {"symbols",   no_argument, NULL, 'y'},
@@ -64,7 +64,7 @@ main (int argc, char *argv[]) {
   memset (cfg, 0, sizeof(MACA_CONF));
   while (1) {
     int index = 0;
-    int c = getopt_long (argc, argv, "aHhSylLds:", long_options, &index);
+    int c = getopt_long (argc, argv, "aHhSylLds", long_options, &index);
     if (c == -1) break;
     if (c == 'a') {
       cfg->strings_size = 4;
@@ -75,7 +75,6 @@ main (int argc, char *argv[]) {
       cfg->show_dynamic = 1;
       cfg->show_symbols = 1;
       cfg->show_lang = 1;
-      
     }
     if (c == 'S') cfg->show_sections = 1;
     if (c == 'h') cfg->show_header = 1;
@@ -85,21 +84,24 @@ main (int argc, char *argv[]) {
     if (c == 'L') cfg->show_lang = 1;
     if (c == 's') {
       cfg->show_strings = 1;
-      if (optarg) cfg->strings_size = atoi (optarg);
-      else cfg->strings_size = 4;
+      cfg->strings_size = 4;
     }
     if (c == 'H') {
       usage ();
       exit (EXIT_SUCCESS);
     }
   }
-
+  
   if (!cfg->show_header && !cfg->show_sections && !cfg->show_segments &&
       !cfg->show_dynamic && !cfg->show_lang && !cfg->show_strings && !cfg->show_symbols) {
     usage ();
     exit (EXIT_SUCCESS);
   }
-  
+  if (optind == argc) {
+    fprintf (stderr, "Missing file name\n");
+    exit (1);
+  }
+
   if ((o = maca_obj_new(argv[optind])) == NULL) {
     exit (EXIT_FAILURE);
   }

@@ -38,13 +38,13 @@ maca_out_elf_info (MACA_OBJ *o) {
   printf (FG_LWHITE"Description      :"RESET" [%s] ",
 	  o->class == 1 ? "32 bits" : "64 bits");
 
-  if (o->isa > N_ISA)
+  if (o->isa >= N_ISA)
     printf ("Unknown Machine [%x] ", o->isa);
   else {
     printf ("[%s] ", isa[o->isa]);
   }
   printf ("[%s] ", o->endian == 1 ? "LSB" : "MSB");
-    if ( o->osabi  > N_OSABI)
+    if ( o->osabi  >= N_OSABI)
     printf ("[Unknown ABI (%x %x)] ", o->osabi, o->osabiver);
   else {
     printf ("[%s] ", osabi[o->osabi]);
@@ -53,7 +53,7 @@ maca_out_elf_info (MACA_OBJ *o) {
   }
   
   //o->type  = get_u16(elf_hdr->e_type);
-  if (o->type > N_TYPE)
+  if (o->type >= N_TYPE)
     printf ("Unknown Type [%x] ", o->type);
   else
     printf ("[%s] ", type[o->type]);
@@ -213,6 +213,14 @@ maca_out_elf_dyn_section (MACA_OBJ *o){
     }
    
   }
+#ifdef DEBUG
+  printf ("PRINT DYN_SECTION\nC : %f C++: %f RUST: %f GO : %f\n", o->lang[LANG_C],
+	  o->lang[LANG_CPP],
+	  o->lang[LANG_RUST],
+	  o->lang[LANG_GO]
+	  );
+#endif    
+
   return 0;
 }
 
@@ -220,7 +228,7 @@ maca_out_elf_dyn_section (MACA_OBJ *o){
 int
 maca_out_elf_symbols (MACA_OBJ *o) {
   char *tmp, *tmp1;
-  int   ind_rust = 0;
+  int   ind_rust = 0, ind_cpp = 0;
   
   if (!o) return -1;
   printf ( BG_WHITE "SYMBOLS & DYNAMC SYMBOLS                                                                                               "RESET"\n");  
@@ -253,6 +261,7 @@ maca_out_elf_symbols (MACA_OBJ *o) {
     else if (!strncmp (o->sym[i].name, "exec", 4))         {printf (BG_RED2);}
     else if (!strncmp (o->sym[i].name, "memfd_create",12)) {printf (BG_RED2);}
 
+    if (strstr(o->sym[i].name,"__cxx")) ind_cpp++;
     if (strlen (o->sym[i].name) > 180) ind_rust++;
     if (o->sym[i].type == STT_FUNC && o->sym[i].section != SHN_UNDEF) {
       int ph = maca_obj_find_ph_by_addr (o, o->sym[i].value);
@@ -267,7 +276,16 @@ maca_out_elf_symbols (MACA_OBJ *o) {
 	    tmp, o->sym[i].name, tmp1);
 
   }
-  if (ind_rust > 5) o->lang[LANG_RUST] +=1.0;
+  if (ind_cpp > ind_rust) o->lang[LANG_CPP] += 1.0;
+  else if (ind_rust > 10) o->lang[LANG_RUST] +=1.0;
+#ifdef DEBUG
+  printf ("SYMBOLS\nC : %f C++: %f (%d) RUST: %f (%d) GO : %f\n", o->lang[LANG_C],
+	  o->lang[LANG_CPP], ind_cpp,
+	  o->lang[LANG_RUST], ind_rust,
+	  o->lang[LANG_GO]
+	  );
+#endif    
+
   return 0;
 }
 
@@ -292,6 +310,7 @@ maca_out_strings (MACA_OBJ *o, size_t size, int out) {
     if (*p!=0 && (isprint(*p) || isspace(*p) )) n++;
     else {
       if (n >= size) {
+	// TODO: Check for numbers at the end of string for Rust
 	if (q[1] == '_' && q[2] == 'Z' && q[3] == 'N') {
 	  if (isdigit(q[4])) rust_ind++;
 	  else cpp_ind++;
@@ -333,7 +352,6 @@ maca_out_strings (MACA_OBJ *o, size_t size, int out) {
   else if (cpp_ind > 0) o->lang[LANG_CPP] += 1; else o->lang[LANG_C] += 1;
 
 #ifdef DEBUG  
-  
   printf ("C++: %d RUST: %d GO : %d\n", cpp_ind, rust_ind, go_ind);
   printf ("C : %f C++: %f RUST: %f GO : %f\n", o->lang[LANG_C],
 	  o->lang[LANG_CPP],
