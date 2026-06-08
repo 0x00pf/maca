@@ -33,8 +33,9 @@ void usage (void) {
   printf ("Usage: maca <options> elf-file\n");
   printf ("Options:\n");
   printf (" -a --all               Equivalent to -h -l -S -s -d -L\n");
-  printf (" -h --help              Shows this help\n");
+  printf (" -H --help              Shows this help\n");
   printf (" -s --strings           Displays strings\n");
+  printf (" -h --header            Displays ELF header\n");
   printf (" -S --sections          Displays Section headers\n");
   printf (" -l --segments          Displays Program headers\n");
   printf (" -d --dynamic           Displays Dynamic Section\n");

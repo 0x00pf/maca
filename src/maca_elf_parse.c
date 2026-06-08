@@ -278,36 +278,43 @@ maca_read_symbols64 (MACA_OBJ *o) {
   }
   o->n_sym = n1 + n2;
   Elf64_Sym *symbol;
-  char *symstr = (char *)(o->p + o->s[o->s[ss].link].off);
-  char *sh_symtab_p = (char*)(o->p + o->s[ss].off);
-  for (int i = 0; i < n1; i++) {
-    symbol =  &((Elf64_Sym *)sh_symtab_p)[i];
-    if (symbol->st_name)
-      o->sym[i].name = strdup (symstr + symbol->st_name);
-    else
-      o->sym[i].name = "NONAME";
-    o->sym[i].value = symbol->st_value;
-    o->sym[i].type = ELF64_ST_TYPE(symbol->st_info);
-    o->sym[i].size = symbol->st_size;
-    o->sym[i].vis = ELF64_ST_VISIBILITY(symbol->st_other);
-    o->sym[i].is_dynamic = 0;
-    o->sym[i].section = symbol->st_shndx;
+  char *symstr;
+  char *sh_symtab_p;
+  if (n1) {
+    symstr = (char *)(o->p + o->s[o->s[ss].link].off);
+    sh_symtab_p = (char*)(o->p + o->s[ss].off);
+    
+    for (int i = 0; i < n1; i++) {
+      symbol =  &((Elf64_Sym *)sh_symtab_p)[i];
+      if (symbol->st_name)
+	o->sym[i].name = strdup (symstr + symbol->st_name);
+      else
+	o->sym[i].name = "NONAME";
+      o->sym[i].value = symbol->st_value;
+      o->sym[i].type = ELF64_ST_TYPE(symbol->st_info);
+      o->sym[i].size = symbol->st_size;
+      o->sym[i].vis = ELF64_ST_VISIBILITY(symbol->st_other);
+      o->sym[i].is_dynamic = 0;
+      o->sym[i].section = symbol->st_shndx;
+    }
   }
 
-  symstr = (char *)(o->p + o->s[o->s[sds].link].off);
-  sh_symtab_p = (char*)(o->p + o->s[sds].off);
-  for (int i = 0; i < n2; i++) {
-    symbol =  &((Elf64_Sym *)sh_symtab_p)[i];
-    if (symbol->st_name)
-      o->sym[n1+i].name = strdup (symstr + symbol->st_name);
-    else
-      o->sym[n1+i].name = "NONAME";
-    o->sym[n1+i].value = symbol->st_value;
-    o->sym[n1+i].type = ELF64_ST_TYPE(symbol->st_info);
-    o->sym[n1+i].size = symbol->st_size;
-    o->sym[n1+i].vis = ELF64_ST_VISIBILITY (symbol->st_other);
-    o->sym[n1+i].is_dynamic = 1;
-    o->sym[n1+i].section = symbol->st_shndx;
+  if (n2) {
+    symstr = (char *)(o->p + o->s[o->s[sds].link].off);
+    sh_symtab_p = (char*)(o->p + o->s[sds].off);
+    for (int i = 0; i < n2; i++) {
+      symbol =  &((Elf64_Sym *)sh_symtab_p)[i];
+      if (symbol->st_name)
+	o->sym[n1+i].name = strdup (symstr + symbol->st_name);
+      else
+	o->sym[n1+i].name = "NONAME";
+      o->sym[n1+i].value = symbol->st_value;
+      o->sym[n1+i].type = ELF64_ST_TYPE(symbol->st_info);
+      o->sym[n1+i].size = symbol->st_size;
+      o->sym[n1+i].vis = ELF64_ST_VISIBILITY (symbol->st_other);
+      o->sym[n1+i].is_dynamic = 1;
+      o->sym[n1+i].section = symbol->st_shndx;
+    }
   }
 
   
