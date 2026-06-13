@@ -162,7 +162,7 @@ maca_obj_new (char *fname) {
   printf ("Analysing binary...\n");
   maca_ana_sections (tmp);
   maca_ana_dyn_section (tmp);
-  
+  maca_ana_entropy (tmp);
   return tmp;
 }
 

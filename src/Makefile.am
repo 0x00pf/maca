@@ -21,14 +21,4 @@ macainclude_HEADERS=maca_util.h maca_obj.h maca_elf_parse.h maca_ana.h maca_out.
 EXTRA_DIST=
 
 maca_SOURCES=main.c maca_obj.c maca_util.c maca_elf_parse.c maca_ana.c maca_out.c
-#maca_CFLAGS=-fsanitize=address -g
-#maca_CFLAGS=${CFLAGS} -Wall -O0 -std=c99 -D_GNU_SOURCE=1
-#maca_CFLAGS=${MY_CFLAGS} 
-#maca_LDADD=-lcapstone -lreadline
-
-#lib_LTLIBRARIES=libstan.la
-#libstan_la_SOURCES=case.c core.c utils.c symb.c elf64.c elf32.c \
-#		   ana.c dis.c func.c cfg.c
-#libstan_la_CFLAGS=${MY_CFLAGS}
-#libstan_la_CFLAGS=${CFLAGS} -Wall -O0 -std=c99 -D_GNU_SOURCE=1
-
+maca_LDADD=-lm

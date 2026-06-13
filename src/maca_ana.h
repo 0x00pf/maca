@@ -25,7 +25,7 @@ extern "C" {
 
   int maca_ana_sections    (MACA_OBJ *o);
   int maca_ana_dyn_section (MACA_OBJ *o);
-  
+  int maca_ana_entropy     (MACA_OBJ *o);  
 #ifdef __cplusplus
 }
 #endif 

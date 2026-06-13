@@ -85,7 +85,7 @@ int
 maca_out_elf_sections (MACA_OBJ *o) {
   printf ( BG_WHITE "SECTIONS                                                                                                               "RESET"\n");
   if (o->n_s) {
-    printf (FG_LWHITE" N     NAME                  TYPE   ADD    OFF     SZ ES   F  L  I\n"RESET);
+    printf (FG_LWHITE" N     NAME                  TYPE   ADD    OFF     SZ ES   F  L  I   E\n"RESET);
     for (int i = 0; i < o->n_s; i++) {
       if (!strcmp(o->s[i].name, ".text"))              printf (FG_LGREEN);
       else if (!strcmp  (o->s[i].name, ".rodata"))     printf (FG_CYAN);
@@ -105,10 +105,11 @@ maca_out_elf_sections (MACA_OBJ *o) {
       else if (!strncmp (o->s[i].name, ".note",5))     printf (FG_LYELLOW);
       char f[32];
       maca_util_elf_get_s_flags(f, o->s[i].flags);
-      printf ("[%02d] %20s %4x %8lx %6lx %6lx %02ld %3s %2d %2d\n" RESET,
+      printf ("[%02d] %20s %4x %8lx %6lx %6lx %02ld %3s %2d %2d   %s%4.3lf\n" RESET,
 	      i, o->s[i].name, o->s[i].type,
 	      o->s[i].addr, o->s[i].off, o->s[i].size,
-	      o->s[i].ent_size, f, o->s[i].link, o->s[i].info);
+	      o->s[i].ent_size, f, o->s[i].link, o->s[i].info,
+	      o->s[i].ent > 7.0 ? FG_RED : "", o->s[i].ent);
     }
   } else {
     printf (FG_LRED "Stripped binary\n" RESET); 
@@ -121,7 +122,7 @@ maca_out_elf_segments (MACA_OBJ *o) {
   if (!o) return -1;
   printf ( BG_WHITE "PROGRAM HEADERS                                                                                                        "RESET"\n");
 
-  printf (FG_LWHITE"[  ]             TYPE PERM    VADDR     PADDR       OFFSET FILESIZE  MEMSIZE    ALIGN\n"RESET);
+  printf (FG_LWHITE"[  ]             TYPE PERM    VADDR     PADDR       OFFSET FILESIZE  MEMSIZE    ALIGN   ENT\n"RESET);
   for (int i = 0; i < o->n_p; i++) {
     char perm[128];
     memset (perm,0, 128);
@@ -129,11 +130,11 @@ maca_out_elf_segments (MACA_OBJ *o) {
     else if (o->ph[i].type == PT_INTERP) printf (FG_LYELLOW);
     else if (o->ph[i].type == PT_NOTE) printf (FG_CYAN);
     maca_util_elf_ph_perm (o->ph[i].flags, perm);
-    printf ("[%02d] %16s [%lx] %3s %8lx %8lx %8lx %08lx %8lx %8lx\n" RESET,
+    printf ("[%02d] %16s [%lx] %3s %8lx %8lx %8lx %08lx %8lx %8lx     %s%4.3lf\n" RESET,
 	    i, maca_util_elf_get_ph_type(o->ph[i].type), o->ph[i].flags, perm,
 	    o->ph[i].vaddr, o->ph[i].paddr, o->ph[i].off,
-	    o->ph[i].fsize, o->ph[i].msize,
-	    o->ph[i].align
+	    o->ph[i].fsize, o->ph[i].msize, o->ph[i].align,
+	    o->ph[i].ent > 7.0 ? FG_RED : "", o->ph[i].ent
 	    );
     
   }  
@@ -260,6 +261,8 @@ maca_out_elf_symbols (MACA_OBJ *o) {
     else if (!strncmp (o->sym[i].name, "mmap", 4))         {printf (BG_RED2);}
     else if (!strncmp (o->sym[i].name, "exec", 4))         {printf (BG_RED2);}
     else if (!strncmp (o->sym[i].name, "memfd_create",12)) {printf (BG_RED2);}
+    else if (!strncmp (o->sym[i].name, "dlopen", 6))       {printf (FG_LRED);}
+    else if (!strncmp (o->sym[i].name, "dlsym", 5))        {printf (FG_LRED);}
 
     if (strstr(o->sym[i].name,"__cxx")) ind_cpp++;
     if (strlen (o->sym[i].name) > 180) ind_rust++;

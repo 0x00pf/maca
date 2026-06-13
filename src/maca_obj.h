@@ -35,6 +35,7 @@ typedef struct maca_section_t{
   uint32_t    link;
   uint32_t    info;
   uint64_t    ent_size;
+  double      ent;
 } MACA_SECTION;
 
 typedef struct maca_ph_t {
@@ -46,6 +47,7 @@ typedef struct maca_ph_t {
   uint64_t    fsize;
   uint64_t    msize;
   uint64_t    align;
+  double      ent;
 } MACA_PH;
 
 typedef struct maca_dyn_t {

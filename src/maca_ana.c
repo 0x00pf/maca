@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
+
 
 #include <elf.h>
 
@@ -78,3 +80,48 @@ maca_ana_dyn_section (MACA_OBJ *o) {
 
   return 0;
 }
+
+int
+maca_ana_entropy (MACA_OBJ *o) {
+  double  h1[256];   // Normal histogram
+  double  h2[256];   // Overall histogram
+  long    t1, t2;
+  
+  for (int i = 0; i < 256; i++) h1[i] = h2[i] = 0;
+  t1 = t2 = 0;
+  
+  // Calculate entropy per section
+  for (int i = 0; i < o->n_s; i++) {
+    unsigned char *p = o->p + o->s[i].off;
+    t1 = 0;
+    for (int j = 0; j < o->s[i].size; j++, t1++) h1[p[j]]++;
+    if (t1) {
+      for (int j = 0; j < 256; j++) h1[j] = h1[j] / (double)t1;
+      // Calculate entropy
+      double sum = 0;
+      for (int j = 0; j < 256; j++) {
+	if (h1[j]) sum += h1[j] * log2 (h1[j]);
+      }
+      o->s[i].ent = -sum;
+    } else o->s[i].ent = 0;
+  }
+  
+  // Calculate entropy per PHDR
+  for (int i = 0; i < o->n_p; i++) {
+    unsigned char *p = o->p + o->ph[i].off;
+    t1 = 0;
+    for (int j = 0; j < o->ph[i].fsize; j++, t1++) h1[p[j]]++;
+    if (t1) {
+      for (int j = 0; j < 256; j++) h1[j] = h1[j] / (double)t1;
+      // Calculate entropy
+      double sum = 0;
+      for (int j = 0; j < 256; j++) {
+	if (h1[j]) sum += h1[j] * log2 (h1[j]);
+      }
+      o->ph[i].ent = -sum;
+    } else o->ph[i].ent = 0;
+  }
+  // XXX: Sliding window Entropy calculation?
+  return 0;
+}
+
