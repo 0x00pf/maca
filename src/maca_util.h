@@ -64,7 +64,9 @@ typedef struct config_t {
   uint8_t  show_lang;
   uint8_t  show_strings;
   uint8_t  show_symbols;
+  uint8_t  show_code_caves;
   int      strings_size;
+  char     *section;
 } MACA_CONF;
 
 #ifdef __cplusplus

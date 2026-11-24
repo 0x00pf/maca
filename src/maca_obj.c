@@ -118,6 +118,10 @@ maca_obj_new (char *fname) {
 
   tmp->n_addr = 0;
   tmp->addr = NULL;
+  tmp->section = -1;
+
+  tmp->n_cc = 0;
+  tmp->cc = NULL;
   // Read Header info and allocates internal structures
   if (tmp->class == 1) { //32 bits
     Elf32_Ehdr* elf_hdr1 = (Elf32_Ehdr *) tmp->p;
@@ -163,6 +167,8 @@ maca_obj_new (char *fname) {
   maca_ana_sections (tmp);
   maca_ana_dyn_section (tmp);
   maca_ana_entropy (tmp);
+  maca_ana_code_caves (tmp);
+  
   return tmp;
 }
 

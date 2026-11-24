@@ -21,10 +21,11 @@ maca_obj_dump (MACA_OBJ *o) {
   maca_out_strings (o, cfg->strings_size, cfg->show_strings);
 
   if (cfg->show_segments) maca_out_elf_segments (o);
+  if (cfg->show_code_caves) maca_out_code_caves (o);
   if (cfg->show_sections) maca_out_elf_sections (o);
   if (cfg->show_dynamic) maca_out_elf_dyn_section (o);
   if (cfg->show_symbols) maca_out_elf_symbols (o);
-  if (cfg->show_lang) maca_out_file_lang(o);
+  if (cfg->show_lang) maca_out_file_lang(o); 
 
   return 0;
 }
@@ -32,12 +33,13 @@ maca_obj_dump (MACA_OBJ *o) {
 void usage (void) {
   printf ("Usage: maca <options> elf-file\n");
   printf ("Options:\n");
-  printf (" -a --all               Equivalent to -h -l -S -s -d -L\n");
+  printf (" -a --all               Equivalent to -h -l -S -s -d -L -c\n");
   printf (" -H --help              Shows this help\n");
   printf (" -s --strings           Displays strings\n");
   printf (" -h --header            Displays ELF header\n");
   printf (" -S --sections          Displays Section headers\n");
   printf (" -l --segments          Displays Program headers\n");
+  printf (" -c --codecaves         Displays Code Caves\n");
   printf (" -d --dynamic           Displays Dynamic Section\n");
   printf (" -y --symbols           Displays Symbols\n");
   printf (" -L --languages         Displays Source Programmng Language guess\n");
@@ -45,6 +47,7 @@ void usage (void) {
 
 /* TO BE COMPLETED*/
 static struct option long_options[] = {
+  {"set-section", required_argument, NULL, 'j'},
   {"all",       no_argument, NULL, 'a'},
   {"help",      no_argument, NULL, 'H'},
   {"strings",   no_argument, NULL, 's'},
@@ -54,6 +57,7 @@ static struct option long_options[] = {
   {"segments",  no_argument, NULL, 'l'},
   {"dynamic",   no_argument, NULL, 'd'},
   {"languages", no_argument, NULL, 'L'},
+  {"codecaves", no_argument, NULL, 'c'},
   {NULL, 0, NULL, 0}
 };
 
@@ -65,7 +69,7 @@ main (int argc, char *argv[]) {
   memset (cfg, 0, sizeof(MACA_CONF));
   while (1) {
     int index = 0;
-    int c = getopt_long (argc, argv, "aHhSylLds", long_options, &index);
+    int c = getopt_long (argc, argv, "aHhSyclLdsj:", long_options, &index);
     if (c == -1) break;
     if (c == 'a') {
       cfg->strings_size = 4;
@@ -75,6 +79,7 @@ main (int argc, char *argv[]) {
       cfg->show_segments = 1;
       cfg->show_dynamic = 1;
       cfg->show_symbols = 1;
+      cfg->show_code_caves = 1;
       cfg->show_lang = 1;
     }
     if (c == 'S') cfg->show_sections = 1;
@@ -83,6 +88,10 @@ main (int argc, char *argv[]) {
     if (c == 'd') cfg->show_dynamic = 1;
     if (c == 'y') cfg->show_symbols = 1;
     if (c == 'L') cfg->show_lang = 1;
+    if (c == 'c') cfg->show_code_caves = 1;
+    if (c == 'j') {
+      cfg->section = strdup(optarg);
+    }
     if (c == 's') {
       cfg->show_strings = 1;
       cfg->strings_size = 4;
@@ -94,7 +103,8 @@ main (int argc, char *argv[]) {
   }
   
   if (!cfg->show_header && !cfg->show_sections && !cfg->show_segments &&
-      !cfg->show_dynamic && !cfg->show_lang && !cfg->show_strings && !cfg->show_symbols) {
+      !cfg->show_dynamic && !cfg->show_lang && !cfg->show_strings && !cfg->show_symbols
+      && !cfg->show_code_caves) {
     usage ();
     exit (EXIT_SUCCESS);
   }

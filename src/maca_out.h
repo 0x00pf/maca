@@ -32,6 +32,7 @@ extern "C" {
   int maca_out_elf_symbols (MACA_OBJ *o) ;
   int maca_out_strings (MACA_OBJ *o, size_t size, int print);
   int maca_out_file_lang (MACA_OBJ *o);
+  int maca_out_code_caves (MACA_OBJ *o);
   
 #ifdef __cplusplus
 }

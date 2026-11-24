@@ -109,7 +109,7 @@ maca_out_elf_sections (MACA_OBJ *o) {
 	      i, o->s[i].name, o->s[i].type,
 	      o->s[i].addr, o->s[i].off, o->s[i].size,
 	      o->s[i].ent_size, f, o->s[i].link, o->s[i].info,
-	      o->s[i].ent > 7.0 ? FG_RED : "", o->s[i].ent);
+	      o->s[i].ent > 7.0 ? FG_RED : "", o->s[i].ent * 100.0 / 8.0);
     }
   } else {
     printf (FG_LRED "Stripped binary\n" RESET); 
@@ -134,7 +134,7 @@ maca_out_elf_segments (MACA_OBJ *o) {
 	    i, maca_util_elf_get_ph_type(o->ph[i].type), o->ph[i].flags, perm,
 	    o->ph[i].vaddr, o->ph[i].paddr, o->ph[i].off,
 	    o->ph[i].fsize, o->ph[i].msize, o->ph[i].align,
-	    o->ph[i].ent > 7.0 ? FG_RED : "", o->ph[i].ent
+	    o->ph[i].ent > 7.0 ? FG_RED : "", o->ph[i].ent * 100.0 / 8.0
 	    );
     
   }  
@@ -322,9 +322,9 @@ maca_out_strings (MACA_OBJ *o, size_t size, int out) {
 	if ((strstr ((char*)q + 1, "/lib/go-")) != NULL) go_ind++;
 	if ((strstr ((char*)q + 1, ":unwrap()")) != NULL) rust_ind++;
 	if (out) {
-
+	  
 	  int s = maca_obj_find_sec_by_addr (o, q - o->p);
-
+	  if ((o->section != -1) && (o->section != s)) {q=p;n=0;continue;}
 	  // Colorize based on sections that usually contains strings
 	  if (s != -1) {
 	    if      (!strcmp (o->s[s].name, ".shstrtab")) printf (FG_CYAN);
@@ -334,7 +334,7 @@ maca_out_strings (MACA_OBJ *o, size_t size, int out) {
 	    else if (!strcmp (o->s[s].name, ".bss")) printf (FG_LYELLOW);
 	    printf ("[%18s] ",o->s[s].name);
 	  } 
-	  printf ("0x%06lx [%03x]: ",  q-o->p, n);
+	  printf ("0x%06lx [%03x]: ",  q-o->p + 1, n);
 
 	  if (n > 80) n = 80;
 	  for (int i = 1; i <= n; i++) {
@@ -390,3 +390,22 @@ maca_out_file_lang (MACA_OBJ *o){
   return 0;
 }
 
+
+int
+maca_out_code_caves (MACA_OBJ *o) {
+  if (!o) return -1;
+  printf ( BG_WHITE "CODE CAVES                                                                                                             "RESET"\n");
+  if (o->n_cc == 0) printf ("No code caves found!\n");
+  else {
+    char perm[128];
+    memset (perm,0, 128);
+
+    for (int i = 0; i < o->n_cc; i++) {
+      maca_util_elf_ph_perm (o->cc[i].flags, perm);
+      if (o->cc[i].flags == (PF_X | PF_R)) printf (FG_GREEN);
+      printf ("CAVE %02d : 0x%08lx 0x%08lx %s (%lx)\n" RESET,
+	      i, o->cc[i].addr, o->cc[i].size, perm, o->cc[i].flags);
+    }
+  }
+  return 0;
+}

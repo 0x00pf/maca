@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -125,3 +126,35 @@ maca_ana_entropy (MACA_OBJ *o) {
   return 0;
 }
 
+
+int
+maca_ana_code_caves (MACA_OBJ *o) {
+  int64_t   size = 0;
+  uint64_t  addr = 0;
+  MACA_CC   *p  = o->cc;
+
+  for (int i = 1; i < o->n_p; i++) {
+    if (o->ph[i].type == PT_LOAD && o->ph[i].vaddr != 0) {
+      addr = o->ph[i - 1].vaddr  + o->ph[i - 1].fsize;
+      size = o->ph[i].vaddr - addr;
+    
+      if (size > 0) {
+#if DEBUG	
+	printf ("Found Cave at %lx. Size %lx, Flag %lx\n",
+		addr, size, o->ph[i - 1].flags);
+#endif
+	if ((p = realloc (o->cc, (o->n_cc + 1) * sizeof (MACA_CC))) == NULL) {
+	  fprintf (stderr, "Cannot reallocate memory.\n");
+	  return -1;
+	}
+	o->cc = p;
+	o->cc[o->n_cc].addr = addr;
+	o->cc[o->n_cc].size = size;
+	o->cc[o->n_cc].flags = o->ph[i-1].flags;
+	o->n_cc++;
+      }
+    }
+    
+  }
+  return 0;
+}

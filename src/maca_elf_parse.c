@@ -102,7 +102,7 @@ maca_read_sections32 (MACA_OBJ *o) {
     o->s[i].ent_size  = o->get_u32(s[i].sh_entsize);
     tmp = str+ name;
     o->s[i].name = tmp;
-    
+    if (cfg->section && !strncmp (cfg->section, o->s[i].name, strlen(o->s[i].name)))    o->section = i;    
 #ifdef DEBUG 
     printf ("[%02d] %20s %4x %8lx %6lx %6lx %02ld %lx %2d %2d\n",
 	    i, str + name, o->s[i].type,
@@ -144,6 +144,7 @@ int
 maca_read_sections64 (MACA_OBJ *o) {
   Elf64_Shdr *s, *sstr;
   char       *str, *tmp;
+  MACA_CONF *cfg = maca_util_get_conf();
   
   s = (Elf64_Shdr*)(o->p + o->s_off);
   sstr = &s[o->sstr];
@@ -161,6 +162,7 @@ maca_read_sections64 (MACA_OBJ *o) {
     o->s[i].ent_size  = o->get_u64(s[i].sh_entsize);
     tmp = str+ name;
     o->s[i].name = tmp;
+    if (cfg->section && !strncmp (cfg->section, o->s[i].name, strlen(o->s[i].name)))    o->section = i;
 #ifdef DEBUG 
     printf ("[%02d] %20s %4x %8lx %6lx %6lx %02ld %lx %2d %2d\n",
 	    i, str + name, o->s[i].type,

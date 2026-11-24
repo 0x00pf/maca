@@ -81,6 +81,12 @@ typedef struct maca_addr_t {
   uint64_t p;
 } MACA_ADDR;
 
+typedef struct maca_codecave_t {
+  uint64_t    addr;
+  uint64_t    size;
+  uint64_t    flags;
+} MACA_CC;
+
 // TODO: Add zig, Nim and Crystal
 #define LANG_UNKNOWN 0
 #define LANG_C       1
@@ -109,11 +115,13 @@ typedef struct maca_obj_t {
   uint16_t        type;     // PIE, NON-Pie
   uint16_t        machine;  // target machine
   uint64_t        entry;
+  int16_t         section;  // User selected section
   uint16_t        n_s;
   uint16_t        n_p;
   uint16_t        n_dn;
   uint16_t        n_sym;
   uint64_t        n_addr;
+  uint64_t        n_cc;
   uint16_t        sent_size;
   uint16_t        pent_size;
   uint64_t        s_off;
@@ -128,6 +136,7 @@ typedef struct maca_obj_t {
   MACA_DYN        *dyn;
   MACA_SYM        *sym;
   MACA_ADDR       *addr;
+  MACA_CC         *cc;
 } MACA_OBJ;
 
 
